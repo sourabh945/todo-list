@@ -2,16 +2,17 @@
 //
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { User, IUser } from "../models/User";
+import { User } from "../models/User";
 import AppError from "../utils/AppError";
 import catchAsync from "../utils/catchAsync";
 
 const signToken = (id: string): string => {
+  const expiresIn = +(process.env.JWT_EXPIRES_IN ?? 10) * 24 * 3600 * 100;
   const secret =
-    process.env.JWT_SECRET ?? process.env.JWT_PEM_KEY ?? "i love the peaches";
+    process.env.JWT_SECRET ?? process.env.JWT_PEM_KEY ?? "i love peaches";
+
   return jwt.sign({ id }, secret, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-    algorithm: process.env.JWT_ALGORITHM ?? "HS256",
+    expiresIn: expiresIn,
   });
 };
 
