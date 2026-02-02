@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    /* 1. Environment & Target */
+    "target": "ESNext" /* Use latest JS features */,
+    "module": "NodeNext" /* Essential for modern Node.js ESM */,
+    "moduleResolution": "NodeNext" /* Finds imports correctly for Node */,
+    "lib": ["ESNext"] /* Use latest JS standard libraries */,
+
+    /* 2. File Layout */
+    "rootDir": "./src" /* Where you write your code */,
+    "outDir": "./dist" /* Where the compiled code goes */,
+    "removeComments": true /* Keeps the production code small */,
+
+    /* 3. Strictness (The "Bug Catcher") */
+    "strict": true /* Enables all strict type-checking */,
+    "noImplicitAny": true /* Errors if a type isn't defined */,
+    "strictNullChecks": true /* Prevents "Cannot read property of undefined" */,
+    "noUnusedLocals": true /* Errors if you create a variable but don't use it */,
+    "noUnusedParameters": true /* Errors if function params aren't used */,
+
+    /* 4. Interop & Safety */
+    "esModuleInterop": true /* Allows easy imports from older JS libraries */,
+    "forceConsistentCasingInFileNames": true /* Crucial for Windows vs Linux/Mac compatibility */,
+    "skipLibCheck": true /* Speeds up compilation by skipping library tests */,
+    "sourceMap": true /* Helps you debug TS code in the browser/Zed */,
+  },
+  "include": ["src/**/*"] /* Only compile what's in src */,
+  "exclude": ["node_modules", "dist"] /* Don't waste time on these */,
+}
