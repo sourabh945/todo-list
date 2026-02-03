@@ -1,7 +1,7 @@
 import express from "express";
 import pinoHttp from "pino-http";
 import logger from "./utils/logger";
-import globalErrorHandler from "./middleware/errorMiddleware";
+import globalErrorHandler from "./middleware/error.middleware";
 
 const app = express();
 
