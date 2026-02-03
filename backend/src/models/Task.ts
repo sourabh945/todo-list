@@ -10,9 +10,9 @@ import {
   WithTimestamps,
   VirtualType,
   UpdateQuery,
-  Error,
+  InferRawDocType,
 } from "mongoose";
-import AppError from "../utils/AppError";
+import { ErrorType, ModelErrorHandler } from "./ModelErrorHandlers";
 
 interface TaskDoc extends Document, WithTimestamps<Document> {
   user_id: Types.ObjectId;
@@ -35,12 +35,12 @@ interface TaskModel extends Model<TaskDoc, empty, TaskVirtual> {
     userId: string,
     page: number,
     limit: number,
-  ): Promise<Types.Array<TaskDoc>>;
+  ): Promise<Types.Array<InferRawDocType<TaskDoc>>>;
   getAllDoneTasksForUser(
     userId: string,
     page: number,
     limit: number,
-  ): Promise<Types.Array<TaskDoc>>;
+  ): Promise<Types.Array<InferRawDocType<TaskDoc>>>;
   updateTask(
     taskId: string,
     userId: string,
@@ -150,57 +150,60 @@ taskSchema.index({ user_id: 1, _status: 1 });
 
 //adding statics
 
-/**
- * Gets all active tasks for a specific user with pagination.
- * Active Tasks are defined as: 'in-progress' or 'pending'.
- * * @param {string} userId - The _id of the User (usually from JWT).
- * @param {number} [page=1] - The current page for pagination, default = 1
- * @param {number} [limit=20] - The number of records per page, default = 20
- * @returns {Promise<Types.Array<Object>>} - A promise that resolves to an array of task objects.
+/**this function is for get the all active tasks ( status: pending or in-progress ) for a user with peginations
+ * Default values are page = 1 and limit = 20
  */
 taskSchema.statics.getAllActiveTasksForUser = async function (
   userId: string,
   page = 1,
   limit = 20,
 ) {
-  const skip = (page - 1) * limit;
-  const activeTasks = await this.find({
-    user_id: new Types.ObjectId(userId),
-    _status: {
-      $in: [reverseStatusMap.pending, reverseStatusMap["in-progress"]],
-    },
-  })
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit as number)
-    .lean();
-  return activeTasks;
+  try {
+    const skip = (page - 1) * limit;
+    const activeTasks = await this.find({
+      user_id: new Types.ObjectId(userId),
+      _status: {
+        $in: [reverseStatusMap.pending, reverseStatusMap["in-progress"]],
+      },
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit as number)
+      .lean();
+    return activeTasks;
+  } catch (err) {
+    throw ModelErrorHandler(err as ErrorType);
+  }
 };
 
 /**
  * This is for get the all done tasks ( status: done ) for a user with peginations
- * * @param {string} userId - The _id of the User (usually from JWT).
- * @param {number} [page=1] - The current page for pagination, default = 1
- * @param {number} [limit=20] - The number of records per page, default = 20
- * @returns {Promise<Array<Object>>} - A promise that resolves to an array of task objects.
+ * Default values are page = 1 and limit = 20
  */
 taskSchema.statics.getDoneTasksForUser = async function (
   userId: string,
   page = 1,
   limit = 20,
 ) {
-  const skip = (page - 1) * limit;
-  const doneTasks = await this.find({
-    user_id: new Types.ObjectId(userId),
-    _status: reverseStatusMap.done,
-  })
-    .sort({ updatedAt: -1 })
-    .skip(skip)
-    .limit(limit as number)
-    .lean();
-  return doneTasks;
+  try {
+    const skip = (page - 1) * limit;
+    const doneTasks = await this.find({
+      user_id: new Types.ObjectId(userId),
+      _status: reverseStatusMap.done,
+    })
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit as number)
+      .lean();
+    return doneTasks;
+  } catch (err) {
+    throw ModelErrorHandler(err as ErrorType);
+  }
 };
 
+/**
+ * This is for update a task for a user using taskid and user id
+ */
 taskSchema.statics.updateTask = async function (
   userId: string,
   taskId: string,
@@ -213,18 +216,7 @@ taskSchema.statics.updateTask = async function (
     );
     return result.matchedCount > 0;
   } catch (err) {
-    if (err instanceof Error.ValidationError)
-      throw new AppError(err.message, err.message, 400);
-    else if (err instanceof Error.CastError)
-      throw new AppError(err.message, err.message, 400);
-    else if (err instanceof Error)
-      throw new AppError(err.message, "Internal Server Error", 500);
-    else
-      throw new AppError(
-        "Unknown Error on update of Task",
-        "Internal Server Error",
-        500,
-      );
+    throw ModelErrorHandler(err as Error);
   }
 };
 
