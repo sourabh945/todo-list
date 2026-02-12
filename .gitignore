@@ -137,3 +137,9 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+#adding custom gitignores
+**/.jwt-dev-secret
+**/.app.logs
+**/temp/
+**/mongo-data
