@@ -1,46 +1,53 @@
 // this file contain the controllers for the login and signup of the user
 //
-import jwt from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
-import { User } from "../models/user.model";
-import AppError from "../utils/AppError";
-import catchAsync from "../utils/catchAsync";
+import { Request, Response } from "express";
+import User from "../models/user.model";
+import catchAsync from "../utils/catchAsync.error.util";
+import { signToken } from "../utils/token.auth.util";
 
-const signToken = (id: string): string => {
-  const expiresIn = +(process.env.JWT_EXPIRES_IN ?? 10) * 24 * 3600 * 100;
-  const secret =
-    process.env.JWT_SECRET ?? process.env.JWT_PEM_KEY ?? "i love peaches";
+export const signup = catchAsync(async (req: Request, res: Response) => {
+  const { username, name, password } = req.body as {
+    username: string;
+    name: string;
+    password: string;
+  };
 
-  return jwt.sign({ id }, secret, {
-    expiresIn: expiresIn,
+  const user = await User.create({ username, name, password });
+
+  const token = signToken({
+    id: String(user._id),
+    username: String(user.username),
   });
-};
 
-export const login = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { username, password } = req.body as {
-      username: string;
-      password: string;
-    };
-    if (!username || !password) {
-      return next(
-        new AppError(
-          "No Username and No password",
-          "Please give the username and the password",
-          400,
-        ),
-      );
-    }
-
-    //getting the user using credentials
-    const user = await User.findByCredentials(username, password);
-
-    const token = signToken(user._id.toString());
-
-    res.status(200).json({
-      status: "sucess",
-      token: token,
+  res.status(201).json({
+    status: "success",
+    token,
+    data: {
       username: user.username,
-    });
-  },
-);
+      name: user.name,
+    },
+  });
+});
+
+export const login = catchAsync(async (req: Request, res: Response) => {
+  const { username, password } = req.body as {
+    username: string;
+    password: string;
+  };
+
+  const user = await User.findByCredentials(username, password);
+
+  const token = signToken({
+    id: String(user._id),
+    username: String(user.username),
+  });
+
+  res.status(200).json({
+    status: "success",
+    token,
+    data: {
+      username: user.username,
+      name: user.name,
+    },
+  });
+});

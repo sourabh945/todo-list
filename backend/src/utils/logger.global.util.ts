@@ -2,12 +2,18 @@
 //
 
 import pino from "pino";
+import path from "path";
+
+const logFilePath = path.join(
+  process.cwd(),
+  process.env.LOG_FILE_NAME ?? "./app/logs/app.logs",
+);
 
 const pinoTargets: pino.TransportTargetOptions[] = [
   {
     target: "pino/file", //add the file target for the log file
     options: {
-      destination: process.env.LOG_FILE_PATH ?? "./.app.logs",
+      destination: logFilePath,
       mkdir: true,
     },
     level: process.env.FILE_LOG_LEVEL ?? process.env.LOG_LEVEL ?? "info",
@@ -15,7 +21,11 @@ const pinoTargets: pino.TransportTargetOptions[] = [
 ];
 
 //check the permission to print in the terminal
-if (process.env.TERMINAL_LOG == "allow") {
+if (
+  process.env.TERMINAL_LOG == "allow" ||
+  process.env.TERMINAL_LOG == "true" ||
+  process.env.NODE_ENV == "development"
+) {
   pinoTargets.push({
     target: "pino-pretty",
     options: {

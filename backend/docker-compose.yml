@@ -1,0 +1,23 @@
+services:
+  app:
+    build: .
+    container_name: todo-app
+    ports:
+      - "3000:3000"
+    environment:
+      - DB=mongodb://mongo-db:27017/todo-app
+      - NODE_ENV=development
+    volumes:
+      # Maps local ./logs folder to the container's /app/logs
+      - ./logs:/app/logs
+    depends_on:
+      - mongo-db
+
+  mongo-db:
+    image: mongo:latest
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    volumes:
+      # Maps local ./mongo-data folder to Mongo's internal data path
+      - ./mongo-data:/data/db

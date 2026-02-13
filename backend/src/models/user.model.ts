@@ -3,7 +3,7 @@
 
 import { Schema, model, Model, Document, Types } from "mongoose";
 import bcrypt from "bcryptjs";
-import AppError from "../utils/AppError";
+import AppError from "../utils/AppError.error.util";
 
 interface IUserBase {
   username: string;
@@ -16,7 +16,7 @@ interface IUserDocument extends Document, IUserBase {
   __v?: number;
 }
 
-export type IUser = IUserBase & { _id: Types.ObjectId };
+type IUser = IUserBase & { _id: Types.ObjectId };
 
 interface IUserModel extends Model<IUserDocument> {
   findByCredentials(username: string, password: string): Promise<IUser>;
@@ -32,6 +32,10 @@ const userSchema = new Schema<IUserDocument, IUserModel>({
       /^[A-Za-z0-9]+$/,
       "username {VALUE} is not follow the username regex [A-Za-z0-9]{10}",
     ],
+    errors: {
+      required: "Username is required",
+      unique: "Username {VALUE} is already taken",
+    },
   },
   name: { type: String },
   password: { type: String, required: true },
@@ -65,4 +69,5 @@ userSchema.statics.findByCredentials = async function (
   return userWithoutPassword as IUser;
 };
 
-export const User = model<IUserDocument, IUserModel>("User", userSchema);
+const User = model<IUserDocument, IUserModel>("User", userSchema);
+export default User;

@@ -23,7 +23,13 @@
     "forceConsistentCasingInFileNames": true /* Crucial for Windows vs Linux/Mac compatibility */,
     "skipLibCheck": true /* Speeds up compilation by skipping library tests */,
     "sourceMap": true /* Helps you debug TS code in the browser/Zed */,
+
+    "typeRoots": ["./node_modules/@types", "./src/types"],
   },
-  "include": ["src/**/*"] /* Only compile what's in src */,
+  "include": ["src/**/*", "src/**/*.d.ts"] /* Only compile what's in src */,
   "exclude": ["node_modules", "dist"] /* Don't waste time on these */,
+  "ts-node": {
+    "files": true,
+    "transpileOnly": false,
+  },
 }

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import AppError from "../utils/AppError";
+import AppError from "../utils/AppError.error.util";
 
 type MongoDuplicateKeyError = mongoose.mongo.MongoServerError & {
   code: 11000;
@@ -14,14 +14,16 @@ const isDuplicateKeyError = (
 
 export type ErrorType = mongoose.Error | Error;
 
-export const ModelErrorHandler = (err: mongoose.Error | Error): AppError => {
+export const ModelErrorHandler = (
+  err: mongoose.Error | Error,
+): AppError | Error => {
   // 1. Validation Error
   if (err instanceof mongoose.Error.ValidationError) {
     const messages = Object.values(err.errors).map((el) => el.message);
 
     return new AppError(
       err.message,
-      `Invalid input data: ${messages.join(". ")}`,
+      `Invalid input data: ${messages.join(", ")}`,
       400,
     );
   }
@@ -43,9 +45,5 @@ export const ModelErrorHandler = (err: mongoose.Error | Error): AppError => {
   }
 
   // 4. Fallback
-  return new AppError(
-    err.message || "Internal Server Error",
-    "Something went wrong on our end. Please try again later.",
-    500,
-  );
+  return new Error(err.message);
 };
