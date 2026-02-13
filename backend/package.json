@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts",
+    "dev": "DOTENV_CONFIG_PATH=./.env tsx watch ./src/server.ts",
     "test": "echo \"no test command\""
   },
   "repository": {
@@ -45,6 +45,7 @@
     "jiti": "^2.6.1",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0"
   }

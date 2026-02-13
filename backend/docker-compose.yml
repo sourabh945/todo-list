@@ -5,13 +5,13 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DB=mongodb://mongo-db:27017/todo-app
+      - DATABASE_URL=mongodb://mongo-db:27017/todo-app
       - NODE_ENV=development
     volumes:
-      # Maps local ./logs folder to the container's /app/logs
       - ./logs:/app/logs
     depends_on:
-      - mongo-db
+      mongo-db:
+        condition: service_healthy
 
   mongo-db:
     image: mongo:latest
@@ -19,5 +19,10 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      # Maps local ./mongo-data folder to Mongo's internal data path
       - ./mongo-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s

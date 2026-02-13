@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
 import http from "http";
-import dotenv from "dotenv";
 
 // ─── Load Environment Variables ──────────────────────────────────────────────
 
-dotenv.config();
+import "dotenv/config.js";
 
 // ─── Load Logger ──────────────────────────────────────────────────────────────
 
@@ -97,7 +96,7 @@ if (ENV == "production" && DB == undefined) {
 }
 
 if (ENV == "development" && DB == undefined) {
-  DB = "mongodb://localhost:27017/todo-app";
+  DB = "mongodb:27017/todo-app";
   logger.info("[Precheck] [Pass] [ENV] using a default DB URL");
 }
 

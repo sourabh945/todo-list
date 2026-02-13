@@ -5,9 +5,16 @@ import globalErrorHandler from "./middleware/error.middleware.js";
 
 const app = express();
 
+app.disable("x-powered-by");
+
 // This middleware assigns a unique 'req.id' to every request
 // and logs when the request starts and when the response finishes.
-app.use(pinoHttp({ logger }));
+app.use(
+  pinoHttp({
+    logger,
+    redact: ["req.headers.authorization", "req.headers.cookie"],
+  }),
+);
 
 app.use(express.json());
 
