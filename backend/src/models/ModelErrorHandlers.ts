@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import AppError from "../utils/AppError.error.util";
+import AppError from "../utils/AppError.error.util.js";
 
 type MongoDuplicateKeyError = mongoose.mongo.MongoServerError & {
   code: 11000;

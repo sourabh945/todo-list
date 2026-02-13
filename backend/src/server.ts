@@ -8,7 +8,7 @@ dotenv.config();
 
 // ─── Load Logger ──────────────────────────────────────────────────────────────
 
-import logger from "./utils/logger.global.util";
+import logger from "./utils/logger.global.util.js";
 
 // ─── Environment Validation ─────────────────────────────────────────────────
 
@@ -110,22 +110,23 @@ if (DB == undefined) {
 
 // ─── Loading DB ───────────────────────────────────────────────────────────────
 
-import connectDB from "./database/connectDB.db.util";
+import connectDB from "./database/connectDB.db.util.js";
 
-void (async () => {
-  try {
-    const isSuccess = await connectDB(DB);
-    if (!isSuccess) {
-      process.exit(2);
-    }
-  } catch (err) {
-    throw new Error(err as string);
+try {
+  await connectDB(DB);
+  logger.info("[Start] [Done] [MongoDB] Database connected successfully");
+} catch (err) {
+  logger.error(`[Start] [Fail] [MongoDB] ${toErrorMessage(err)}`);
+  const stack = toErrorStack(err);
+  if (stack) {
+    logger.error(`[Start] [Fail] [MongoDB] Stack: ${stack}`);
   }
-})();
+  process.exit(1);
+}
 
 // ─── Loading App and start server ───────────────────────────────────────────────────────────────
 
-import app from "./app";
+import app from "./app.js";
 
 try {
   const server = app.listen(PORT, () => {

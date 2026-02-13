@@ -2,6 +2,7 @@
   "name": "todo-app",
   "version": "1.0.0",
   "description": "just a todo application",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "build": "tsc",
@@ -37,14 +38,14 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.1.0",
+    "@types/pino": "^7.0.5",
+    "bcryptjs": "^3.0.3",
     "eslint": "^9.39.2",
     "globals": "^17.3.0",
     "jiti": "^2.6.1",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0",
-    "@types/pino": "^7.0.5",
-    "bcryptjs": "^3.0.3"
+    "typescript-eslint": "^8.54.0"
   }
 }

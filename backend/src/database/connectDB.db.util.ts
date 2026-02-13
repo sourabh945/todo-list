@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import logger from "../utils/logger.global.util";
+import logger from "../utils/logger.global.util.js";
 
 //event listner for different occuation;
 

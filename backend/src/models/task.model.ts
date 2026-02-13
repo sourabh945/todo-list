@@ -12,7 +12,7 @@ import {
   UpdateQuery,
   InferRawDocType,
 } from "mongoose";
-import { ErrorType, ModelErrorHandler } from "./ModelErrorHandlers";
+import { ErrorType, ModelErrorHandler } from "./ModelErrorHandlers.js";
 
 interface TaskDoc extends Document, WithTimestamps<Document> {
   user_id: Types.ObjectId;

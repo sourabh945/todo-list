@@ -1,7 +1,7 @@
 // this file contain the custom error class for the app
 //
 
-import logger from "./logger.global.util";
+import logger from "./logger.global.util.js";
 
 export default class AppError extends Error {
   public readonly statusCode: number;

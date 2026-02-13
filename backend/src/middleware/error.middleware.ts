@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import { MongoServerError } from "mongodb";
-import AppError from "../utils/AppError.error.util";
+import AppError from "../utils/AppError.error.util.js";
 
 // ─── Type for MongoDB duplicate key errors ───────────────────────────────────
 

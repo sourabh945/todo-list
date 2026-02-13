@@ -3,7 +3,7 @@
 
 import { Schema, model, Model, Document, Types } from "mongoose";
 import bcrypt from "bcryptjs";
-import AppError from "../utils/AppError.error.util";
+import AppError from "../utils/AppError.error.util.js";
 
 interface IUserBase {
   username: string;

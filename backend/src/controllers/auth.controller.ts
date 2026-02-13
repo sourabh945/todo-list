@@ -1,9 +1,9 @@
 // this file contain the controllers for the login and signup of the user
 //
 import { Request, Response } from "express";
-import User from "../models/user.model";
-import catchAsync from "../utils/catchAsync.error.util";
-import { signToken } from "../utils/token.auth.util";
+import User from "../models/user.model.js";
+import catchAsync from "../utils/catchAsync.error.util.js";
+import { signToken } from "../utils/token.auth.util.js";
 
 export const signup = catchAsync(async (req: Request, res: Response) => {
   const { username, name, password } = req.body as {

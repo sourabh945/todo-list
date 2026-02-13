@@ -1,7 +1,7 @@
 import express from "express";
-import pinoHttp from "pino-http";
-import logger from "./utils/logger.global.util";
-import globalErrorHandler from "./middleware/error.middleware";
+import { pinoHttp } from "pino-http";
+import logger from "./utils/logger.global.util.js";
+import globalErrorHandler from "./middleware/error.middleware.js";
 
 const app = express();
 
@@ -13,7 +13,7 @@ app.use(express.json());
 
 // ... your routes ...
 
-import AuthRoutes from "./routes/auth.routes";
+import AuthRoutes from "./routes/auth.routes.js";
 
 app.use("/api/v1/auth", AuthRoutes);
 

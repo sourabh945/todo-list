@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
 import fs from "fs";
 import path from "path";
-import AppError from "./AppError.error.util";
-import logger from "./logger.global.util";
+import AppError from "./AppError.error.util.js";
+import logger from "./logger.global.util.js";
 
 interface Payload extends Record<string, unknown> {
   id: string;

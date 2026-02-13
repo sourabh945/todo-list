@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { Types } from "mongoose";
-import AppError from "../utils/AppError.error.util";
-import { verifyToken } from "../utils/token.auth.util";
+import AppError from "../utils/AppError.error.util.js";
+import { verifyToken } from "../utils/token.auth.util.js";
 
 // Helper should explicitly return string or null
 function getTokenFromRequest(req: Request): string | null {
