@@ -30,22 +30,34 @@ interface TaskVirtual extends VirtualType<TaskDoc> {
 
 type empty = object;
 
+interface stats {
+  pending: number;
+  "in-progress": number;
+  "due-this-week": number;
+  "due-today": number;
+}
+
 interface TaskModel extends Model<TaskDoc, empty, TaskVirtual> {
   getAllActiveTasksForUser(
-    userId: string,
+    userId: string | Types.ObjectId,
     page: number,
     limit: number,
   ): Promise<Types.Array<InferRawDocType<TaskDoc>>>;
   getAllDoneTasksForUser(
-    userId: string,
+    userId: string | Types.ObjectId,
     page: number,
     limit: number,
   ): Promise<Types.Array<InferRawDocType<TaskDoc>>>;
   updateTask(
-    taskId: string,
-    userId: string,
+    taskId: string | Types.ObjectId,
+    userId: string | Types.ObjectId,
     updates: UpdateQuery<TaskDoc>,
   ): Promise<boolean>;
+  deleteTask(
+    userId: string | Types.ObjectId,
+    taskId: string | Types.ObjectId,
+  ): Promise<boolean>;
+  getStatsForUser(userId: string | Types.ObjectId): Promise<stats>;
 }
 
 const taskSchema = new Schema<TaskDoc, TaskModel, empty, TaskVirtual>(
@@ -150,11 +162,15 @@ taskSchema.index({ user_id: 1, _status: 1 });
 
 //adding statics
 
+/*
+This function is for get the count of the active tasks ( status: pending or in-progress )
+*/
+
 /**this function is for get the all active tasks ( status: pending or in-progress ) for a user with peginations
  * Default values are page = 1 and limit = 20
  */
 taskSchema.statics.getAllActiveTasksForUser = async function (
-  userId: string,
+  userId: string | Types.ObjectId,
   page = 1,
   limit = 20,
 ) {
@@ -166,7 +182,7 @@ taskSchema.statics.getAllActiveTasksForUser = async function (
         $in: [reverseStatusMap.pending, reverseStatusMap["in-progress"]],
       },
     })
-      .sort({ createdAt: -1 })
+      .sort({ dueDate: 1, createdAt: 1 })
       .skip(skip)
       .limit(limit as number)
       .lean();
@@ -181,7 +197,7 @@ taskSchema.statics.getAllActiveTasksForUser = async function (
  * Default values are page = 1 and limit = 20
  */
 taskSchema.statics.getDoneTasksForUser = async function (
-  userId: string,
+  userId: string | Types.ObjectId,
   page = 1,
   limit = 20,
 ) {
@@ -201,12 +217,12 @@ taskSchema.statics.getDoneTasksForUser = async function (
   }
 };
 
-/**
+/*
  * This is for update a task for a user using taskid and user id
  */
 taskSchema.statics.updateTask = async function (
-  userId: string,
-  taskId: string,
+  userId: string | Types.ObjectId,
+  taskId: string | Types.ObjectId,
   options: UpdateQuery<TaskDoc>,
 ) {
   try {
@@ -217,6 +233,55 @@ taskSchema.statics.updateTask = async function (
     return result.matchedCount > 0;
   } catch (err) {
     throw ModelErrorHandler(err as Error);
+  }
+};
+
+taskSchema.statics.deleteTask = async function (
+  userId: string | Types.ObjectId,
+  taskId: string | Types.ObjectId,
+) {
+  try {
+    const result = await this.deleteOne({
+      _id: new Types.ObjectId(taskId),
+      user_id: new Types.ObjectId(userId),
+    });
+    return result.deletedCount > 0;
+  } catch (err) {
+    throw ModelErrorHandler(err as Error);
+  }
+};
+
+taskSchema.statics.getStatsForUser = async function (
+  userId: string | Types.ObjectId,
+): Promise<stats> {
+  try {
+    const [pending, inProgress, dueThisWeek, dueToday] = await Promise.all([
+      this.countDocuments({
+        user_id: new Types.ObjectId(userId),
+        _status: reverseStatusMap.pending,
+      }),
+      this.countDocuments({
+        user_id: new Types.ObjectId(userId),
+        _status: reverseStatusMap["in-progress"],
+      }),
+      this.countDocuments({
+        user_id: new Types.ObjectId(userId),
+        _status: reverseStatusMap["due-this-week"],
+      }),
+      this.countDocuments({
+        user_id: new Types.ObjectId(userId),
+        _status: reverseStatusMap["due-today"],
+      }),
+    ]);
+
+    return {
+      pending,
+      "in-progress": inProgress,
+      "due-this-week": dueThisWeek,
+      "due-today": dueToday,
+    };
+  } catch (err) {
+    throw ModelErrorHandler(err as ErrorType);
   }
 };
 

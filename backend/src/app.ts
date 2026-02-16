@@ -2,7 +2,7 @@ import express from "express";
 import { pinoHttp } from "pino-http";
 import logger from "./utils/logger.global.util.js";
 import globalErrorHandler from "./middleware/error.middleware.js";
-
+import {} from "./types/express.js";
 const app = express();
 
 app.disable("x-powered-by");
@@ -23,6 +23,10 @@ app.use(express.json());
 import AuthRoutes from "./routes/auth.routes.js";
 
 app.use("/api/v1/auth", AuthRoutes);
+
+import TaskRoutes from "./routes/task.routes.js";
+
+app.use("/api/v1/tasks", TaskRoutes);
 
 // ... end routes ...
 
