@@ -585,7 +585,7 @@ npx eslint . --fix
 
 ## License
 
-ISC © [sourabh945](https://github.com/sourabh945)
+GNU General Public License v3 © [sourabh945](https://github.com/sourabh945)
 
 ---
 
