@@ -2,7 +2,7 @@
 // the MONGODb is used as the DB
 
 import { Schema, model, Model, Document, Types } from "mongoose";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import AppError from "../utils/AppError.error.util.js";
 
 interface IUserBase {
@@ -54,15 +54,15 @@ userSchema.statics.findByCredentials = async function (
   const user = await this.findOne({ username }).select("+password").lean();
   if (!user)
     throw new AppError(
-      "Invalid login credenitals",
-      "Invalid login credenitals",
+      "Invalid login credentials",
+      "Invalid login credentials",
       401,
     );
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch)
     throw new AppError(
-      "Invalid login credenitals",
-      "Invalid login credenitals",
+      "Invalid login credentials",
+      "Invalid login credentials",
       401,
     );
   const { password: __, __v: ___, ...userWithoutPassword } = user;

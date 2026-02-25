@@ -26,7 +26,10 @@ update the task
 */
 export const updateTask = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const id = req.query.id as string;
+  const id = req.params.id;
+  if (!id || typeof id !== "string") {
+    throw new AppError("Invalid task ID", "Invalid task ID", 400);
+  }
   const updates = req.body as { string: string };
   const result = await Task.updateTask(userId, id, updates);
   if (result) {

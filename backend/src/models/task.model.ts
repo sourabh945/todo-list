@@ -32,9 +32,9 @@ type empty = object;
 
 interface stats {
   pending: number;
-  "in-progress": number;
-  "due-this-week": number;
-  "due-today": number;
+  inProgress: number;
+  dueThisWeek: number;
+  dueToday: number;
 }
 
 interface TaskModel extends Model<TaskDoc, empty, TaskVirtual> {
@@ -196,7 +196,7 @@ taskSchema.statics.getAllActiveTasksForUser = async function (
  * This is for get the all done tasks ( status: done ) for a user with peginations
  * Default values are page = 1 and limit = 20
  */
-taskSchema.statics.getDoneTasksForUser = async function (
+taskSchema.statics.getAllDoneTasksForUser = async function (
   userId: string | Types.ObjectId,
   page = 1,
   limit = 20,
@@ -255,6 +255,11 @@ taskSchema.statics.getStatsForUser = async function (
   userId: string | Types.ObjectId,
 ): Promise<stats> {
   try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+
     const [pending, inProgress, dueThisWeek, dueToday] = await Promise.all([
       this.countDocuments({
         user_id: new Types.ObjectId(userId),
@@ -266,20 +271,19 @@ taskSchema.statics.getStatsForUser = async function (
       }),
       this.countDocuments({
         user_id: new Types.ObjectId(userId),
-        _status: reverseStatusMap["due-this-week"],
+        _status: { $ne: reverseStatusMap.done },
+        dueDate: { $gte: today, $lt: nextWeek },
       }),
       this.countDocuments({
         user_id: new Types.ObjectId(userId),
-        _status: reverseStatusMap["due-today"],
+        _status: { $ne: reverseStatusMap.done },
+        dueDate: {
+          $gte: today,
+          $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+        },
       }),
     ]);
-
-    return {
-      pending,
-      "in-progress": inProgress,
-      "due-this-week": dueThisWeek,
-      "due-today": dueToday,
-    };
+    return { pending, inProgress, dueThisWeek, dueToday };
   } catch (err) {
     throw ModelErrorHandler(err as ErrorType);
   }
