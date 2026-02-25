@@ -11,6 +11,7 @@ import {
   VirtualType,
   UpdateQuery,
   InferRawDocType,
+  models,
 } from "mongoose";
 import { ErrorType, ModelErrorHandler } from "./ModelErrorHandlers.js";
 
@@ -289,4 +290,4 @@ taskSchema.statics.getStatsForUser = async function (
   }
 };
 
-export const Task = model<TaskDoc, TaskModel>("Task", taskSchema);
+export const Task = (models.Task as TaskModel) || model<TaskDoc, TaskModel>("Task", taskSchema);

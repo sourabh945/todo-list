@@ -108,7 +108,7 @@ delete a task
 */
 export const deleteTask = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const id = req.query.id as string;
+  const id = req.params.id as string;
 
   const result = await Task.deleteTask(userId, id);
 

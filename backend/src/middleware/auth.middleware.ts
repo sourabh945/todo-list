@@ -30,18 +30,18 @@ const middleware = (req: Request, _res: Response, next: NextFunction) => {
     };
 
     next();
-  } catch (error: unknown) {
+  } catch (err: unknown) {
     // FIX: "Unsafe assignment" fix by checking type of error
-    if (error instanceof AppError) {
-      return next(error);
+    if (err instanceof AppError) {
+      return next(err);
     }
-    next(
-      new AppError(
-        error instanceof Error ? error.message : "Internal Error",
-        "AUTH_ERR",
-        500,
-      ),
-    );
+    if (err instanceof Error && err.name === "JsonWebTokenError") {
+      return next(new AppError("Invalid token", "Invalid token", 401));
+    }
+    if (err instanceof Error && err.name === "TokenExpiredError") {
+      return next(new AppError("Token expired", "Token expired", 401));
+    }
+    return next(new AppError("Internal Error", "AUTH_ERR", 500));
   }
 };
 
