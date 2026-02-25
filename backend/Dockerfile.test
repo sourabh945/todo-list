@@ -1,0 +1,40 @@
+# ─── Test Dockerfile ──────────────────────────────────────────────────────────
+# Uses MongoDB Memory Server (in-process), so NO external MongoDB is needed.
+# Must use a debian-based image — Alpine is NOT supported by mongodb-memory-server.
+#
+# Build & run with:
+#   docker build -f Dockerfile.test -t todo-app-test .
+#   docker run --rm todo-app-test
+
+FROM node:20-bookworm-slim
+
+# Install dependencies required by mongod binary
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    libcurl4 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy dependency manifests first for better layer caching
+COPY package*.json ./
+
+# Install ALL deps (including devDependencies needed for tests)
+RUN npm install
+
+# Copy all source files
+COPY . .
+
+# Set NODE_ENV to test
+ENV NODE_ENV=test
+
+# Pre-download the MongoDB binary so tests don't need internet at runtime
+RUN node --input-type=module <<'JS'
+import { MongoBinary } from 'mongodb-memory-server-core';
+MongoBinary.getPath({ version: '7.0.14' }).catch(e => {
+  console.error('Pre-download failed (non-fatal):', e.message);
+});
+JS
+
+# Run tests
+CMD ["npm", "run", "test"]
