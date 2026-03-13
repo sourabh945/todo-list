@@ -111,17 +111,21 @@ if (DB == undefined) {
 
 import connectDB from "./database/connectDB.db.util.js";
 
-try {
-  await connectDB(DB);
-  logger.info("[Start] [Done] [MongoDB] Database connected successfully");
-} catch (err) {
-  logger.error(`[Start] [Fail] [MongoDB] ${toErrorMessage(err)}`);
-  const stack = toErrorStack(err);
-  if (stack) {
-    logger.error(`[Start] [Fail] [MongoDB] Stack: ${stack}`);
+(async () => {
+  try {
+    await connectDB(DB);
+    logger.info("[Start] [Done] [MongoDB] Database connected successfully");
+  } catch (err) {
+    logger.error(`[Start] [Fail] [MongoDB] ${toErrorMessage(err)}`);
+    const stack = toErrorStack(err);
+    if (stack) {
+      logger.error(`[Start] [Fail] [MongoDB] Stack: ${stack}`);
+    }
+    process.exit(1);
   }
-  process.exit(1);
-}
+})().catch((error: Error) => {
+  logger.error(error);
+});
 
 // ─── Loading App and start server ───────────────────────────────────────────────────────────────
 

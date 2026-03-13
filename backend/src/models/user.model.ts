@@ -1,7 +1,8 @@
 // this file contain the model for the user
 // the MONGODb is used as the DB
-
-import { Schema, model, Model, Document, Types, models } from "mongoose";
+import mongoose from "mongoose"; // work around because mongoose is in commanjs
+const { Schema, model, models } = mongoose;
+import { Document, Model, Types } from "mongoose";
 import bcrypt from "bcrypt";
 import AppError from "../utils/AppError.error.util.js";
 
@@ -69,5 +70,7 @@ userSchema.statics.findByCredentials = async function (
   return userWithoutPassword as IUser;
 };
 
-const User = (models.User as IUserModel) || model<IUserDocument, IUserModel>("User", userSchema);
+const User =
+  (models.User as IUserModel) ||
+  model<IUserDocument, IUserModel>("User", userSchema);
 export default User;

@@ -1,9 +1,9 @@
 // this file contain the task model for the application
 // it use the MONGODB as DB
 //
+import mongoose from "mongoose";
+const { Schema, model, models } = mongoose;
 import {
-  Schema,
-  model,
   Types,
   Document,
   Model,
@@ -11,7 +11,6 @@ import {
   VirtualType,
   UpdateQuery,
   InferRawDocType,
-  models,
 } from "mongoose";
 import { ErrorType, ModelErrorHandler } from "./ModelErrorHandlers.js";
 
@@ -290,4 +289,5 @@ taskSchema.statics.getStatsForUser = async function (
   }
 };
 
-export const Task = (models.Task as TaskModel) || model<TaskDoc, TaskModel>("Task", taskSchema);
+export const Task =
+  (models.Task as TaskModel) || model<TaskDoc, TaskModel>("Task", taskSchema);
