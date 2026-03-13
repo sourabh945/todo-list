@@ -26,7 +26,11 @@
     "typeRoots": ["./node_modules/@types", "./src/types"],
   },
   "include": ["src/**/*", "src/**/*.d.ts"] /* Only compile what's in src */,
-  "exclude": ["node_modules", "dist"] /* Don't waste time on these */,
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/tests/*",
+  ] /* Don't waste time on these */,
   "ts-node": {
     "files": true,
     "transpileOnly": false,
