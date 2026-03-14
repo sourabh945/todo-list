@@ -49,8 +49,8 @@ interface TaskModel extends Model<TaskDoc, empty, TaskVirtual> {
     limit: number,
   ): Promise<Types.Array<InferRawDocType<TaskDoc>>>;
   updateTask(
-    taskId: string | Types.ObjectId,
     userId: string | Types.ObjectId,
+    taskId: string | Types.ObjectId,
     updates: UpdateQuery<TaskDoc>,
   ): Promise<boolean>;
   deleteTask(
@@ -186,7 +186,11 @@ taskSchema.statics.getAllActiveTasksForUser = async function (
       .skip(skip)
       .limit(limit as number)
       .lean();
-    return activeTasks;
+    return activeTasks.map((t) => ({
+      ...t,
+      status: statusMap[t._status],
+      priority: priorityMap[t._priority],
+    }));
   } catch (err) {
     throw ModelErrorHandler(err as ErrorType);
   }
