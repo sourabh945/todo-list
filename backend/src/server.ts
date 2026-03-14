@@ -11,6 +11,7 @@ import logger from "./utils/logger.global.util.js";
 
 // ─── Environment Validation ─────────────────────────────────────────────────
 
+let server: http.Server;
 let DB: string | undefined = process.env?.DATABASE_URL;
 const ENV: string = process.env?.NODE_ENV ?? "production";
 const PORT: number = Number(process.env?.PORT) || 3000;
@@ -107,35 +108,67 @@ if (DB == undefined) {
   process.exit(1);
 }
 
-// ─── Loading DB ───────────────────────────────────────────────────────────────
+// ─── bootstrap function loading db and start application and do everything ───────────────────────────────────────────────────────────────
 
-import connectDB from "./database/connectDB.db.util.js";
+import DatabaseManager from "./database/connectDB.db.util.js";
 
-(async () => {
+async function bootstrap() {
+  const handleCriticalError = () => {
+    if (server) {
+      // You'll need to export your gracefulShutdown helper
+      gracefulShutdown(server, "DB_FAILURE", 1);
+    } else {
+      process.exit(1);
+    }
+  };
+
+  // ─── connecting db ───────────────────────────────────────────────────────────────
+
+  const dbManager = new DatabaseManager(DB!, handleCriticalError);
+
   try {
-    await connectDB(DB);
-    logger.info("[Start] [Done] [MongoDB] Database connected successfully");
-  } catch (err) {
-    logger.error(`[Start] [Fail] [MongoDB] ${toErrorMessage(err)}`);
+    const successStatus = await dbManager.connect();
+    if (successStatus) {
+      logger.info("[Start] [Pass] [DB] Connected to database");
+    } else {
+      logger.error("[Start] [Fail] [DB] Failed to connect to database");
+      process.exit(1);
+    }
+  } catch (err: unknown) {
+    logger.error(`[Start] [Fail] [DB] ${toErrorMessage(err)}`);
     const stack = toErrorStack(err);
     if (stack) {
-      logger.error(`[Start] [Fail] [MongoDB] Stack: ${stack}`);
+      logger.error(`[Start] [Fail] [DB] Stack: ${stack}`);
     }
     process.exit(1);
   }
-})().catch((error: Error) => {
-  logger.error(error);
-});
 
-// ─── Loading App and start server ───────────────────────────────────────────────────────────────
+  // ─── Loading App and start server ───────────────────────────────────────────────────────────────
 
-import app from "./app.js";
+  const { default: app } = await import("./app.js");
 
-try {
-  const server = app.listen(PORT, () => {
-    logger.info(`[Server] [Pass] [Server] Server started on port ${PORT}`);
-  });
+  try {
+    server = app.listen(PORT, () => {
+      logger.info(`[Server] [Pass] [Server] Server started on port ${PORT}`);
+    });
+  } catch (err: unknown) {
+    logger.error(
+      `[Start] [Fail] [Server] Starting failed: ${toErrorMessage(err)}`,
+    );
 
+    const stack = toErrorStack(err);
+    if (stack) {
+      logger.error(`[Start] [Fail] [Server] Stack: ${stack}`);
+    }
+
+    process.exit(1);
+  }
+
+  setupProcessListners(server);
+}
+// ─── Process Listners ───────────────────────────────────────────────────────────────
+
+function setupProcessListners(server: http.Server) {
   process.on("unhandledRejection", (reason: unknown) => {
     logger.error(`[Running] [Rejection] [Server] ${toErrorMessage(reason)}`);
 
@@ -156,15 +189,15 @@ try {
   process.on("SIGINT", () => {
     gracefulShutdown(server, "SIGINT", 0);
   });
-} catch (err: unknown) {
-  logger.error(
-    `[Start] [Fail] [Server] Starting failed: ${toErrorMessage(err)}`,
-  );
+}
 
+(async () => {
+  await bootstrap();
+})().catch((err) => {
+  logger.error(`[Start] [Fail] [Server] ${toErrorMessage(err)}`);
   const stack = toErrorStack(err);
   if (stack) {
     logger.error(`[Start] [Fail] [Server] Stack: ${stack}`);
   }
-
   process.exit(1);
-}
+});
