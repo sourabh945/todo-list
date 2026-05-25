@@ -34,7 +34,7 @@ export const updateTask = catchAsync(async (req: Request, res: Response) => {
   const result = await Task.updateTask(userId, id, updates);
   if (result) {
     res
-      .status(203)
+      .status(204)
       .json({ status: "success", message: "Task updated successfully" });
   } else {
     throw new AppError("Task not found", "Task not found", 404);
